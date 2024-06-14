@@ -82,6 +82,14 @@ def setup_rserver():
             return os.getenv('JUPYTER_RSESSION_PROXY_WWW_FRAME_ORIGIN', default)
         except Exception:
             return default
+        
+    def _attach_project_file(project_file):
+        # Too complex a condition for inline.  Just check:
+        # 1. Does rserver support the rproj-file argument?
+        # 2. Is the environment variable set?
+        # 3. does the file exist?
+        return _support_arg('--rproj-file') and project_file is not None and os.path.exists(project_file)
+        
 
     def _get_cmd(port):
         ntf = tempfile.NamedTemporaryFile()
@@ -108,6 +116,10 @@ def setup_rserver():
             cmd.append(f'--server-data-dir={server_data_dir}')
         if _support_arg('database-config-file'):
             cmd.append(f'--database-config-file={database_config_file}')
+        project_file = os.getenv('JUPYTER_RSESSION_RPROJ_FILE')
+        if _attach_project_file(project_file):
+            cmd.append(f'--rproj-file={project_file}')
+
 
         return cmd
 
